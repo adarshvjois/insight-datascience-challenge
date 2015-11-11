@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-/my-images
+/my-images/*
 *.py[cod]
 *.twitter
 .DS_Store
