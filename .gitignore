@@ -1,8 +1,8 @@
 # Byte-compiled / optimized / DLL files
+/my-images
 *.py[cod]
 *.twitter
 .DS_Store
 *.project
 *.pydevproject
 *.idea
-/my-images
