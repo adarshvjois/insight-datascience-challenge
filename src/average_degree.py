@@ -7,9 +7,8 @@ import itertools
 import logging
 from collections import OrderedDict
 from _abcoll import Iterable
-
-# import matplotlib.pyplot as plt
-# import networkx as nx
+import matplotlib.pyplot as plt
+import networkx as nx
 
 logger = logging.getLogger('tweets_cleaned')
 logger.setLevel(logging.DEBUG)
@@ -111,27 +110,27 @@ class htgraph(object):
         plt.savefig(
             '../my-images/htag_degree' + str(self.average_degree()) + '.png')
 
+    def add_hts_to_graph(self, htlist, timestamp):
 
-def add_hts_to_graph(self, htlist, timestamp):
-    if len(htlist) > 1:
-        ht_edges = itertools.combinations(set(htlist), 2)
+        if len(htlist) > 1:
+            ht_edges = itertools.combinations(set(htlist), 2)
 
-        incoming_edges = [(Edge(edge), timestamp)
-                          for edge in ht_edges]
+            incoming_edges = [(Edge(edge), timestamp)
+                              for edge in ht_edges]
 
-        # ensures that edges have only the latest timestamp
-        # associated with them.
-        self.__live_edges.update(dict(incoming_edges))
-        logger.debug('Updated {}'.format(incoming_edges))
+            # ensures that edges have only the latest timestamp
+            # associated with them.
+            self.__live_edges.update(dict(incoming_edges))
+            logger.debug('Updated {}'.format(incoming_edges))
 
-        current_timestamp = timestamp
-        logger.debug(' Current timestamp {}'.format(str(timestamp)))
-        self.maintain_edges(current_timestamp)
+            current_timestamp = timestamp
+            logger.debug(' Current timestamp {}'.format(str(timestamp)))
+            self.maintain_edges(current_timestamp)
 
-    else:
-        logger.debug(' Current timestamp '.format(str(timestamp)))
-        current_timestamp = timestamp
-        self.maintain_edges(current_timestamp)
+        else:
+            logger.debug(' Current timestamp '.format(str(timestamp)))
+            current_timestamp = timestamp
+            self.maintain_edges(current_timestamp)
 
 
 class GoneIn60Seconds(object):
