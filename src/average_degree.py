@@ -7,6 +7,7 @@ import itertools
 import logging
 from collections import OrderedDict
 from _abcoll import Iterable
+
 # import matplotlib.pyplot as plt
 # import networkx as nx
 
@@ -26,18 +27,19 @@ ch.setFormatter(formatter)
 logger.addHandler(fh)
 logger.addHandler(ch)
 
+
 # simplistic untested wrapper for a dict
 # that always defaults to zero when an item
 # is not found
 
 
 class OrderedZeroDict(OrderedDict):
-
     def __getitem__(self, key):
         try:
             return OrderedDict.__getitem__(self, key)
         except KeyError:
             return 0
+
 
 # a tuple that two way equal.
 # > Edge((2,1)) == Edge((1, 2))
@@ -45,7 +47,6 @@ class OrderedZeroDict(OrderedDict):
 
 
 class Edge(tuple):
-
     def __new__(self, edge_tup):
         return tuple.__new__(self, edge_tup)
 
@@ -62,7 +63,6 @@ class Edge(tuple):
 
 
 class htgraph(object):
-
     def __init__(self, td=timedelta(seconds=60)):
         # Since tweets are expected to arrive in order,
         # the tweets we see first are going to be the first to get
@@ -88,7 +88,7 @@ class htgraph(object):
             return 0.0
 
     def __prune_edge(self, edge):
-        logger.info('Deleted {}'.format(edge))
+        logger.debug('Deleted {}'.format(edge))
         del self.__live_edges[edge]
 
     def maintain_edges(self, current_timestamp):
@@ -97,40 +97,41 @@ class htgraph(object):
                 logger.debug('Pruning {} ..'.format(edge))
                 self.__prune_edge(edge)
 
-#     def draw_graph(self):
-#         # https://www.udacity.com/wiki/creating-network-graphs-with-python
-#         nodes = self.get_nodes()
-#         G = nx.Graph()
-#         for node in nodes:
-#             G.add_node(node)
-#         edges = self.get_edges()
-#         for edge in edges:
-#             G.add_edge(edge[0], edge[1])
-#         pos = nx.shell_layout(G)
-#         nx.draw(G, pos)
-#         plt.savefig(
-#             '../my-images/htag_degree' + str(self.average_degree()) + '.png')
+    def draw_graph(self):
+        # https://www.udacity.com/wiki/creating-network-graphs-with-python
+        nodes = self.get_nodes()
+        G = nx.Graph()
+        for node in nodes:
+            G.add_node(node)
+        edges = self.get_edges()
+        for edge in edges:
+            G.add_edge(edge[0], edge[1])
+        pos = nx.shell_layout(G)
+        nx.draw(G, pos)
+        plt.savefig(
+            '../my-images/htag_degree' + str(self.average_degree()) + '.png')
 
-    def add_hts_to_graph(self, htlist, timestamp):
-        if len(htlist) > 1:
-            ht_edges = itertools.combinations(set(htlist), 2)
 
-            incoming_edges = [(Edge(edge), timestamp)
-                              for edge in ht_edges]
+def add_hts_to_graph(self, htlist, timestamp):
+    if len(htlist) > 1:
+        ht_edges = itertools.combinations(set(htlist), 2)
 
-            # ensures that edges have only the latest timestamp
-            # associated with them.
-            self.__live_edges.update(dict(incoming_edges))
-            logger.debug('Updated {}'.format(incoming_edges))
+        incoming_edges = [(Edge(edge), timestamp)
+                          for edge in ht_edges]
 
-            current_timestamp = timestamp
-            logger.debug(' Current timestamp {}'.format(str(timestamp)))
-            self.maintain_edges(current_timestamp)
+        # ensures that edges have only the latest timestamp
+        # associated with them.
+        self.__live_edges.update(dict(incoming_edges))
+        logger.debug('Updated {}'.format(incoming_edges))
 
-        else:
-            logger.debug(' Current timestamp '.format(str(timestamp)))
-            current_timestamp = timestamp
-            self.maintain_edges(current_timestamp)
+        current_timestamp = timestamp
+        logger.debug(' Current timestamp {}'.format(str(timestamp)))
+        self.maintain_edges(current_timestamp)
+
+    else:
+        logger.debug(' Current timestamp '.format(str(timestamp)))
+        current_timestamp = timestamp
+        self.maintain_edges(current_timestamp)
 
 
 class GoneIn60Seconds(object):
@@ -162,20 +163,20 @@ class GoneIn60Seconds(object):
                 timestamp_str[-1], '%a %b %d %H:%M:%S +0000 %Y')
 
             if len(hashtag_list) > 2:
-                logger.info(', '.join(hashtag_list) + ' ' + str(timestamp))
+                logger.debug('{0} {1}'.format(', '.join(hashtag_list), str(timestamp)))
 
                 self.htgraph.add_hts_to_graph(hashtag_list, timestamp)
 
-                logger.info(
-                    'ROLLING {}'.format(str(self.htgraph.average_degree())))
-                output_file.write(str(self.htgraph.average_degree()) + '\n')
-#               self.htgraph.draw_graph()
-#           if tweet_number % 500 == 0:
-#                logger.info(
-#                    "Drawing a graph for the {}th tweet".format(tweet_number))
-#                self.htgraph.draw_graph()
             else:
                 self.htgraph.maintain_edges(timestamp)
+            logger.info(
+                'ROLLING {}'.format(str(self.htgraph.average_degree())))
+            output_file.write(str(self.htgraph.average_degree()) + '\n')
+
+            if tweet_number % 500 == 0:
+                logger.info(
+                    "Drawing a graph for the {}th tweet".format(tweet_number))
+                self.htgraph.draw_graph()
 
 
 def get_inputs_from_cmd():
@@ -191,6 +192,7 @@ def get_inputs_from_cmd():
     else:
         print "Use the '-h' option to learn to use this"
         sys.exit()
+
 
 if __name__ == '__main__':
     input_file, output_file = get_inputs_from_cmd()
